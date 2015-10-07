@@ -26,25 +26,28 @@ router.get('/', function(req, res, next) {
           let data = JSON.parse(resp.text)
           let url = `http://${req.headers.host}${req.originalUrl}`
           let signatureInfo = accessToken.signature(url)
-          console.log("OK")
-          createUserIfNotExist(data)
+          createUserIfNotExist(data) // 当用户登陆，创建用户
           getRoomInfoOrCreate({openid: req.query.state}, function(room) {
-            console.log(room)
-            res.render('index', {
-              room,
-              title, 
-              data, 
-              common, 
-              signatureInfo
+            User.findOne({openid: room.hoster}, function(err, hoster) {
+              if (err) res.status(500).send("Server error")
+              if (hoster) {
+                room.hoster = hoster.toJSON()
+              } else {
+                room.hoster = {openid: room.hoster}
+              }
+              res.render('index', {
+                room, title, data, common, signatureInfo
+              })
             })
           })
         })
     })
 });
 
-router.put("/users/:id/records", function(req, res) {
-  let data = req.body // {recordId, openid}
-  let hoster = req.params.id
+router.put("/users/:openid/records", function(req, res) {
+  let data = JSON.parse(req.body.data) // {recordId, openid}
+  let hoster = req.params.openid
+  console.log(data)
   Room.update({hoster}, {$pushAll: {records: [data]}}, {upsert: true}, function(err) {
     if (err) {
       return res.json({
@@ -61,6 +64,7 @@ router.put("/users/:id/records", function(req, res) {
 })
 
 function createUserIfNotExist(data) {
+  if (!data.openid) return
   var query = User.findOne({openid: data.openid})
   query.exec(function(err, result) {
     if (err) {
@@ -76,12 +80,9 @@ function createUserIfNotExist(data) {
 }
 
 function getRoomInfoOrCreate(data, cb) {
-  console.log(1, "walking...", data)
   Room.findOne({hoster: data.openid}, function(err, result) {
-    console.log(2, "walking...", result)
     if (err) return cb(err)
     if (result) return cb(result.toJSON())
-    console.log("walking...", result)
     let room = new Room({hoster: data.openid, records: []})
     room.save(function(err, result) {
       if (err) return cb(err)

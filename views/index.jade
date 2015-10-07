@@ -3,13 +3,155 @@ extends layout
 block head
   script(src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js")
   script(src="/lib/zepto.min.js")
+  style.
+    * {margin: 0; padding: 0;}
+    body {
+      background: #eee;
+    }
+    img.small {
+      border-radius: 3px;
+      width: 40px;
+      height: 40px;
+    }
+    div.hoster {
+      z-index: 100;
+      background-image: url(/assets/bg.jpg);
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      text-algin: center;
+      border-bottom: 1px solid #ddd;
+      padding: 20px 0;
+    }
+    img.hoster {
+      margin: 0 auto;
+      display: block;
+      border-radius: 100px;
+      height: 80px;
+      width: 80px;
+    }
+    h3 {
+      margin-top: 15px;
+      text-align: center;
+      color: #666;
+    }
+    div.btns {
+      //background-image: url(/assets/bg.jpg);
+      padding-top: 10px;
+      text-align: center;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      height: 50px;
+      border-top: 1px solid #ddd;
+      background: #eee;
+    }
+    .btn {
+      text-decoration: none;
+      width: 60px;
+      height: 30px;
+      line-height: 30px;
+      padding: 5px;
+      text-align: center;
+      font-size: 15px;
+      border-radius: 3px;
+      margin-right: 5px;
+      margin-bottom: 5px;
+      background-color: #FBFAFB;
+      color: #454545;
+      display: inline-block;
+    }
+    .btn.primary {
+      color: #fff;
+      background-color: #04be02;
+      margin-right: 10px;
+    }
+    .btn.bottom {
+      width: 40%;
+    }
+    div#records {
+      padding: 10px;
+      margin-top: 165px;
+      margin-bottom: 60px;
+    }
+    div.record {
+      padding: 10px;
+    }
+    img.bubble {
+      height: 40px;
+      margin-left: 20px;
+    }
+    .playing img.bubble {
+      opacity: 0.5
+      -webkit-animation: play 1s infinite; /* Chrome, Safari, Opera */ 
+      animation: play 1s infinite;
+    }
+    @-webkit-keyframes play {
+      0%   {opacity: 1}
+      50% {opacity: 0.3}
+      100% {opacity: 1}
+    }
+
+    @keyframes play {
+      0%   {opacity: 1}
+      50% {opacity: 0.3}
+      100% {opacity: 1}
+    }
+    div.share {
+      display: none;
+      z-index: 600;
+      background-color: rgba(0,0,0,0.9);
+      color: #666;
+      -webkit-transform: translate3d(0,0,0);
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
+    div.share div.back {
+      border: 2px solid #666;
+      border-radius: 5px;
+      padding: 5px;
+      text-align: center;
+      width: 60px;
+      position: absolute;
+      bottom: 30%;
+      margin: auto;
+      left: 0;
+      right: 0;
+    }
+    div.share img.share-logo {
+      position: absolute;
+      right: 20px;
+    }
+    div.no-data {
+      text-align: center;
+      padding: 40px;
+      color: #ccc;
+    }
 
 block content
-  h1= title
-  p#code
-  img.avatar(src="#{data.headimgurl}", width="60", height="60")
-  div
-    button#record 录音
+  div.hoster
+    img.avatar.hoster(src="#{data.headimgurl}")
+    h3= title
+  div#records
+    - room.records.reverse()
+    - if (room.records.length === 0) {
+      div.no-data 暂时没有人唱歌
+    - } else {
+      each record in room.records
+        div.record(data-serverId="#{record.recordId}", id="#{record.recordId}")
+          img.avatar.small(src="#{record.user.headimgurl}")
+          img.bubble(src="/assets/bubble1.png")
+    - }
+  div.btns
+    a.btn.bottom.primary#record 录音
+    a.btn.bottom#my 我也要听歌
+  div.share
+    img.share-logo(src="/assets/share.png", alt="分享")
+    div.back 返回
 
 block scripts
   script.
@@ -17,14 +159,20 @@ block scripts
     var common = !{JSON.stringify(common)};
     var signatureInfo = !{JSON.stringify(signatureInfo)};
     var data = !{JSON.stringify(data)};
+    var room = !{JSON.stringify(room)};
     if (data.errcode) {
       dataStr = localStorage.getItem("user")
       if (dataStr) data = JSON.parse(dataStr)
     } else {
       localStorage.setItem("user", JSON.stringify(data))
     }
-    $("img").attr("src", data.headimgurl)
+    $("img.avatar.hoster").attr("src", room.hoster.headimgurl || "/assets/default.jpg")
     var code = "#{data.code}";
+    if (data.openid === room.hoster.openid) {
+      $("#my").addClass("share").text("抓个朋友来唱歌")
+    } else {
+      $("#my").addClass("make-my-room").text("我也要听歌")
+    }
 
   script(src="/bin/scripts/home.js")
   
