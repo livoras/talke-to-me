@@ -34,6 +34,7 @@
   "license": "MIT",
   "dependencies": {
     "babel": "^5.8.23",
-    "react": "^0.13.3"
+    "react": "^0.13.3",
+    "zepto": "0.0.4"
   }
 }

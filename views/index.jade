@@ -1,9 +1,30 @@
 extends layout
 
+block head
+  script(src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js")
+  script(src="/lib/zepto.min.js")
+
 block content
   h1= title
-  p Welcome to #{title}
+  p#code
+  img.avatar(src="#{data.headimgurl}", width="60", height="60")
+  div
+    button#record 录音
 
 block scripts
+  script.
+    var title = "#{title}";
+    var common = !{JSON.stringify(common)};
+    var signatureInfo = !{JSON.stringify(signatureInfo)};
+    var data = !{JSON.stringify(data)};
+    if (data.errcode) {
+      dataStr = localStorage.getItem("user")
+      if (dataStr) data = JSON.parse(dataStr)
+    } else {
+      localStorage.setItem("user", JSON.stringify(data))
+    }
+    $("img").attr("src", data.headimgurl)
+    var code = "#{data.code}";
+
   script(src="/bin/scripts/home.js")
   

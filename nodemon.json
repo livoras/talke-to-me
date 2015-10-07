@@ -1,6 +1,6 @@
 {
     "verbose": true,
-    "watch": ["src/", "public/", "routes/", "views/"],
+    "watch": ["*", "src/", "public/", "routes/", "views/"],
     "ignore": ["*.test.js", "fixtures/*"],
     "ext": ["js"],
     "exec": "PORT=8000 ./bin/www"
