@@ -65,8 +65,7 @@ router.put("/users/:openid/records", function(req, res) {
 
 function createUserIfNotExist(data) {
   if (!data.openid) return
-  var query = User.findOne({openid: data.openid})
-  query.exec(function(err, result) {
+  var query = User.find({openid: data.openid}, function(err, result) {
     if (err) {
       return console.log(err)
     }
@@ -74,6 +73,10 @@ function createUserIfNotExist(data) {
       let user = User(data)
       user.save(function(err, res) {
         console.log("save user", user)
+      })
+    } else {
+      User.update({openid: data.openid}, data, function() {
+        console.log("update..")
       })
     }
   })
